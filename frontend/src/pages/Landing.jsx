@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import API from '../api/axios';
 import ZwigatoLogo from '../components/Logo';
+import foodImage from '../assets/food.jpg'
 
 export default function Landing() {
   const { login } = useAuth();
@@ -76,7 +77,7 @@ export default function Landing() {
         {/* Food image */}
         <div className="relative z-10 flex-1 mx-10 mt-6 mb-10 rounded-2xl overflow-hidden shadow-lg">
           <img
-            src="/src/assets/food.jpg"
+           src={foodImage}
             alt="Delicious food"
             className="w-full h-full object-cover"
             style={{ maxHeight: '280px' }}
