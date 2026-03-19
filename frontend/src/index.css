@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background-color: #fafaf8;
+  color: #1a1a1a;
+}
+
+.font-display { font-family: 'Playfair Display', serif; }
+
+/* Instagram-style story ring */
+.story-ring {
+  background: linear-gradient(45deg, #f97316, #ef4444, #ec4899);
+  padding: 2px;
+  border-radius: 50%;
+}
+.story-ring-seen {
+  background: #d1d5db;
+  padding: 2px;
+  border-radius: 50%;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #f1f1f1; }
+::-webkit-scrollbar-thumb { background: #fdba74; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #f97316; }
+
+/* Smooth transitions */
+* { transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease; }
+
+/* Post card hover */
+.post-card { transition: transform 0.2s ease, box-shadow 0.2s ease; }
+.post-card:hover { transform: translateY(-1px); }
+
+/* Like animation */
+@keyframes like-pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.3); }
+  100% { transform: scale(1); }
+}
+.like-pop { animation: like-pop 0.3s ease; }
+
+/* Auth page gradient */
+.auth-gradient {
+  background: linear-gradient(135deg, #fff8f0 0%, #ffedd5 50%, #fed7aa 100%);
+  min-height: 100vh;
+}
+
+/* Input focus */
+input:focus, textarea:focus {
+  outline: none;
+  ring: 2px;
+}
