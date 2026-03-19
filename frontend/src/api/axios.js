@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: '/api',
+  baseURL: ' https://zwigato-backend-h8y2.onrender.com/api',
   headers: { 'Content-Type': 'application/json' }
 });
 
