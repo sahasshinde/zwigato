@@ -4,7 +4,6 @@ import PostCard from '../components/PostCard';
 import { useAuth } from '../context/AuthContext';
 
 const TAGS_OPTIONS = ['spicy', 'vegan', 'bestseller', 'new', 'healthy', 'sweet', 'street food', 'chef special'];
-const EMOJIS = ['🍕','🍔','🍜','🍛','🍝','🍣','🍰','🥗','🌮','🍩','🧆','🥘','🍱','☕','🧁','🥙'];
 
 const STATUS_COLORS = {
   placed: 'bg-blue-50 text-blue-600',
@@ -32,7 +31,7 @@ export default function PartnerDashboard() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('posts');
   const [showForm, setShowForm] = useState(false);
-  const [form, setForm] = useState({ dishName: '', description: '', price: '', emoji: '🍽️', tags: [] });
+  const [form, setForm] = useState({ dishName: '', description: '', price: '', tags: [] });
   const [videoFile, setVideoFile] = useState(null);
   const [videoPreview, setVideoPreview] = useState('');
   const [error, setError] = useState('');
@@ -42,16 +41,16 @@ export default function PartnerDashboard() {
   const fileInputRef = useRef();
 
   const fetchData = async () => {
-    try {
-      const [postsRes, ordersRes] = await Promise.all([
-        API.get('/partners/profile'),
-        API.get('/orders/partner')
-      ]);
-      setPosts(postsRes.data.posts || []);
-      setOrders(ordersRes.data.orders || []);
-    } catch {}
-    setLoading(false);
-  };
+  try {
+    const postsRes = await API.get('/partners/profile');
+    setPosts(postsRes.data.posts || []);
+  } catch {}
+  try {
+    const ordersRes = await API.get('/orders/partner');
+    setOrders(ordersRes.data.orders || []);
+  } catch {}
+  setLoading(false);
+};
 
   useEffect(() => { fetchData(); }, []);
 
@@ -75,7 +74,6 @@ export default function PartnerDashboard() {
       formData.append('dishName', form.dishName);
       formData.append('description', form.description);
       formData.append('price', form.price);
-      formData.append('emoji', form.emoji);
       formData.append('tags', JSON.stringify(form.tags));
       if (videoFile) formData.append('video', videoFile);
 
@@ -85,7 +83,7 @@ export default function PartnerDashboard() {
       });
 
       setPosts(prev => [data.post, ...prev]);
-      setForm({ dishName: '', description: '', price: '', emoji: '🍽️', tags: [] });
+      setForm({ dishName: '', description: '', price: '', tags: [] });
       setVideoFile(null);
       setVideoPreview('');
       setShowForm(false);
@@ -120,8 +118,7 @@ export default function PartnerDashboard() {
     }));
   };
 
-  const totalLikes = posts.reduce((sum, p) => sum + (p.likes?.length || 0), 0);
-  const totalComments = posts.reduce((sum, p) => sum + (p.comments?.length || 0), 0);
+ 
   const pendingOrders = orders.filter(o => !['delivered', 'cancelled'].includes(o.orderStatus)).length;
   const totalRevenue = orders.filter(o => o.orderStatus === 'delivered').reduce((sum, o) => sum + o.totalAmount, 0);
 
@@ -147,7 +144,7 @@ export default function PartnerDashboard() {
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
           {[
             { label: 'Posts', value: posts.length, icon: '🎥', color: 'bg-orange-50 border-orange-100' },
-            { label: 'Total Likes', value: totalLikes, icon: '❤️', color: 'bg-red-50 border-red-100' },
+            
             { label: 'Pending Orders', value: pendingOrders, icon: '🛒', color: 'bg-blue-50 border-blue-100' },
             { label: 'Revenue', value: `₹${totalRevenue}`, icon: '💰', color: 'bg-green-50 border-green-100' },
           ].map(s => (
@@ -193,17 +190,6 @@ export default function PartnerDashboard() {
                 <input value={form.price} onChange={e => setForm({ ...form, price: e.target.value })}
                   placeholder="e.g. 299" type="number" min="1"
                   className="w-full px-4 py-2.5 border border-gray-200 rounded-xl text-sm bg-gray-50 focus:outline-none focus:border-orange-400 transition" />
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Pick an Emoji</label>
-                <div className="flex flex-wrap gap-2">
-                  {EMOJIS.map(em => (
-                    <button type="button" key={em} onClick={() => setForm({ ...form, emoji: em })}
-                      className={`text-xl p-1.5 rounded-lg transition ${form.emoji === em ? 'bg-orange-100 ring-2 ring-orange-400' : 'hover:bg-gray-100'}`}>
-                      {em}
-                    </button>
-                  ))}
-                </div>
               </div>
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">Tags (optional)</label>
@@ -309,7 +295,6 @@ export default function PartnerDashboard() {
                       {order.orderStatus}
                     </span>
                   </div>
-
                   <div className="grid grid-cols-3 gap-2 text-xs bg-gray-50 rounded-xl p-3 mb-3">
                     <div>
                       <p className="text-gray-400">Qty</p>
@@ -324,10 +309,7 @@ export default function PartnerDashboard() {
                       <p className="font-semibold text-gray-800">{order.paymentMethod}</p>
                     </div>
                   </div>
-
                   <p className="text-xs text-gray-400 mb-3">📍 {order.address}</p>
-
-                  {/* Update Status */}
                   {!['delivered', 'cancelled'].includes(order.orderStatus) && (
                     <div>
                       <p className="text-xs font-medium text-gray-600 mb-1">Update Status:</p>

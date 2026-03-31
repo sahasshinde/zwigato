@@ -20,7 +20,7 @@ export default function UserLogin() {
     try {
       const { data } = await API.post('/auth/user/login', form);
       login(data.user, data.token);
-      navigate('/feed');
+      navigate('/discover');
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Check your credentials.');
     } finally {

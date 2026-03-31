@@ -24,7 +24,7 @@ export default function UserRegister() {
         name: form.name, username: form.username, email: form.email, password: form.password
       });
       login(data.user, data.token);
-      navigate('/feed');
+      navigate('/discover');
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed. Try again.');
     } finally {

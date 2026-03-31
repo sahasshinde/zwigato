@@ -2,17 +2,21 @@ const express = require('express');
 const router = express.Router();
 const Partner = require('../models/Partner');
 const Post = require('../models/Post');
-const User = require('../models/User');
-const cloudinary = require('cloudinary').v2;
 const { protect, partnerOnly } = require('../middleware/auth');
 
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
+// Haversine formula - returns distance in km between two coordinates
+const getDistanceKm = (lat1, lon1, lat2, lon2) => {
+  const R = 6371;
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+};
 
-// GET /api/partners
+// GET /api/partners - Get all partners
 router.get('/', async (req, res) => {
   try {
     const partners = await Partner.find()
@@ -24,7 +28,35 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /api/partners/profile
+// GET /api/partners/nearby?lat=xx&lng=xx - Get partners within 5km
+router.get('/nearby', async (req, res) => {
+  try {
+    const { lat, lng } = req.query;
+    if (!lat || !lng) return res.status(400).json({ message: 'lat and lng are required.' });
+
+    const userLat = parseFloat(lat);
+    const userLng = parseFloat(lng);
+
+    const partners = await Partner.find({
+      latitude: { $ne: null },
+      longitude: { $ne: null }
+    }).select('-password -email');
+
+    const nearby = partners
+      .map(p => ({
+        ...p.toObject(),
+        distance: getDistanceKm(userLat, userLng, p.latitude, p.longitude)
+      }))
+      .filter(p => p.distance <= 5)
+      .sort((a, b) => a.distance - b.distance);
+
+    res.json({ partners: nearby });
+  } catch (err) {
+    res.status(500).json({ message: 'Error fetching nearby partners.' });
+  }
+});
+
+// GET /api/partners/profile - Own partner profile
 router.get('/profile', protect, partnerOnly, async (req, res) => {
   try {
     const partner = await Partner.findById(req.user._id).select('-password');
@@ -35,13 +67,13 @@ router.get('/profile', protect, partnerOnly, async (req, res) => {
   }
 });
 
-// PUT /api/partners/profile
+// PUT /api/partners/profile - Update partner profile
 router.put('/profile', protect, partnerOnly, async (req, res) => {
   try {
-    const { restaurantName, bio, location } = req.body;
+    const { restaurantName, bio, shopNo, buildingName, area, location, latitude, longitude } = req.body;
     const partner = await Partner.findByIdAndUpdate(
       req.user._id,
-      { restaurantName, bio, location },
+      { restaurantName, bio, shopNo, buildingName, area, location, latitude, longitude },
       { new: true, runValidators: true }
     ).select('-password');
     res.json({ message: 'Profile updated!', partner });
@@ -50,43 +82,11 @@ router.put('/profile', protect, partnerOnly, async (req, res) => {
   }
 });
 
-// DELETE /api/partners/delete - Delete partner account
-router.delete('/delete', protect, partnerOnly, async (req, res) => {
-  try {
-    // Get all posts by this partner
-    const posts = await Post.find({ partner: req.user._id });
-
-    // Delete all videos from Cloudinary
-    for (const post of posts) {
-      if (post.videoPublicId) {
-        await cloudinary.uploader.destroy(post.videoPublicId, { resource_type: 'video' });
-      }
-    }
-
-    // Delete all posts
-    await Post.deleteMany({ partner: req.user._id });
-
-    // Remove partner from all users' following list
-    await User.updateMany(
-      { following: req.user._id },
-      { $pull: { following: req.user._id } }
-    );
-
-    // Delete the partner
-    await Partner.findByIdAndDelete(req.user._id);
-
-    res.json({ message: 'Account deleted successfully.' });
-  } catch (err) {
-    res.status(500).json({ message: 'Error deleting account.' });
-  }
-});
-
-// GET /api/partners/:handle
+// GET /api/partners/:handle - Get partner by handle (public)
 router.get('/:handle', async (req, res) => {
   try {
     const partner = await Partner.findOne({ handle: req.params.handle }).select('-password -email');
     if (!partner) return res.status(404).json({ message: 'Partner not found.' });
-
     const posts = await Post.find({ partner: partner._id }).sort({ createdAt: -1 });
     res.json({ partner, posts, followersCount: partner.followers.length });
   } catch (err) {

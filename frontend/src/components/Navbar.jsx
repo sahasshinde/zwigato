@@ -20,7 +20,7 @@ export default function Navbar() {
 
         {/* Logo — far left */}
         <div className="flex-none">
-          <Link to={isPartner ? '/partner/dashboard' : '/feed'}>
+          <Link to={isPartner ? '/partner/dashboard' : '/discover'} >
             <ZwigatoLogo size={30} />
           </Link>
         </div>
@@ -29,11 +29,9 @@ export default function Navbar() {
         <div className="flex-1 flex items-center justify-center gap-1">
           {!isPartner && (
             <>
-              <Link to="/feed" className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${isActive('/feed') ? 'bg-orange-50 text-orange-600' : 'text-gray-600 hover:text-orange-600 hover:bg-orange-50'}`}>
-                🏠 Home
-              </Link>
+              
               <Link to="/discover" className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${isActive('/discover') ? 'bg-orange-50 text-orange-600' : 'text-gray-600 hover:text-orange-600 hover:bg-orange-50'}`}>
-                🔍 Discover
+                🏠 Home
               </Link>
               <Link to="/profile" className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${isActive('/profile') ? 'bg-orange-50 text-orange-600' : 'text-gray-600 hover:text-orange-600 hover:bg-orange-50'}`}>
                 👤 Profile

@@ -74,7 +74,7 @@ router.post('/user/login', async (req, res) => {
 // POST /api/auth/partner/register
 router.post('/partner/register', async (req, res) => {
   try {
-    const { restaurantName, handle, email, password, cuisine, bio, location } = req.body;
+    const { restaurantName, handle, email, password, cuisine, bio, location, latitude, longitude, shopNo, buildingName, area } = req.body;
 
     if (!restaurantName || !handle || !email || !password || !cuisine)
       return res.status(400).json({ message: 'All required fields must be filled.' });
@@ -87,8 +87,7 @@ router.post('/partner/register', async (req, res) => {
     if (handleExists)
       return res.status(400).json({ message: 'Handle already taken.' });
 
-    const partner = await Partner.create({ restaurantName, handle, email, password, cuisine, bio: bio || '', location: location || '' });
-
+    const partner = await Partner.create({ restaurantName, handle, email, password, cuisine, bio: bio || '', location: location || '', latitude: latitude || null, longitude: longitude || null, shopNo: shopNo || '', buildingName: buildingName || '', area: area || '' });
     res.status(201).json({
       message: 'Partner account created!',
       token: generateToken(partner._id, 'partner'),
