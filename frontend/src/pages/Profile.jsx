@@ -108,10 +108,7 @@ export default function Profile() {
           </div>
           {profile.bio && <p className="text-sm text-gray-600 mb-3">{profile.bio}</p>}
           <div className="flex gap-6 text-sm">
-            <div className="text-center">
-              <span className="font-bold text-gray-900">{profile.following?.length || 0}</span>
-              <p className="text-xs text-gray-400">Following</p>
-            </div>
+            
             <div className="text-center">
               <span className="font-bold text-gray-900">{orders.length}</span>
               <p className="text-xs text-gray-400">Orders</p>
@@ -124,7 +121,7 @@ export default function Profile() {
           {[
             { key: 'profile', label: '👤 Profile' },
             { key: 'orders', label: '🛒 My Orders' },
-            { key: 'following', label: '👥 Following' },
+            
           ].map(tab => (
             <button
               key={tab.key}
@@ -250,30 +247,7 @@ export default function Profile() {
           </div>
         )}
 
-        {/* Following Tab */}
-        {activeTab === 'following' && (
-          <div className="bg-white rounded-2xl border border-orange-100 shadow-sm p-6">
-            <h3 className="font-semibold text-gray-900 mb-4">Following ({profile.following?.length || 0})</h3>
-            {profile.following?.length === 0 ? (
-              <div className="text-center py-8">
-                <div className="text-4xl mb-2">👥</div>
-                <p className="text-gray-400 text-sm">Not following anyone yet</p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {profile.following?.map(p => (
-                  <div key={p._id} className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-full bg-orange-100 flex items-center justify-center text-lg">🏪</div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">{p.restaurantName}</p>
-                      <p className="text-xs text-gray-400">@{p.handle}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+        
       </div>
     </div>
   );
